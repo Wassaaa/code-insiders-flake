@@ -5,6 +5,13 @@ on:
     - cron: "0 */12 * * *"
   workflow_dispatch:
 
+permissions:
+  contents: write
+
+concurrency:
+  group: insiders-snapshot
+  cancel-in-progress: false
+
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   GITHUB_REPOSITORY: ${{ github.repository }}
@@ -17,5 +24,6 @@ jobs:
       - uses: cachix/install-nix-action@v27
         with:
           nix_path: nixpkgs=channel:nixos-unstable
+      - run: python3 -m unittest discover -s tests
       - run: |
-          ./update_release.py
+          nix-shell updater.py
